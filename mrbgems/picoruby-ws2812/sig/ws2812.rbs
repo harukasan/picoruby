@@ -1,0 +1,15 @@
+class WS2812
+  def initialize: (Integer pin, Integer pixel_size) -> void
+
+  attr_reader pin: Integer
+  attr_reader pixel_size: Integer
+
+  def set_pixel_at: (Integer index, [Integer, Integer, Integer] rgb) -> void
+  def set_pixel_at_rgb: (Integer index, Integer r, Integer g, Integer b) -> void
+  def clear: () -> void
+  def show: () -> void
+
+  private
+
+  def _init: (Integer pin, Integer pixel_size) -> Integer
+end
