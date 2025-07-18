@@ -9,11 +9,9 @@
 typedef struct {
     PIO pio;
     uint sm;
-    uint pin;
-    uint dma_channel;
-    uint program_offset;
+    int dma_channel;
+    int program_offset;
     uint32_t* pixel_data;
-    uint num_pixels;
     bool transfer_in_progress;
 } rp2040_ws2812_data_t;
 
@@ -23,12 +21,7 @@ static inline uint32_t rgb_to_grb(uint8_t r, uint8_t g, uint8_t b) {
            (uint32_t)(b);
 }
 
-static void start_dma_transfer(rp2040_ws2812_data_t* data) {
-    dma_channel_set_read_addr(data->dma_channel, data->pixel_data, false);
-    dma_channel_set_trans_count(data->dma_channel, data->num_pixels, true);
-}
-
-int ws2812_init(ws2812_t* ws, uint pin, uint pixel_size) {
+int ws2812_init(ws2812_t* ws, int pin, int pixel_size) {
     rp2040_ws2812_data_t* data = malloc(sizeof(rp2040_ws2812_data_t));
     memset(data, 0, sizeof(rp2040_ws2812_data_t));
     
@@ -49,15 +42,13 @@ int ws2812_init(ws2812_t* ws, uint pin, uint pixel_size) {
         }
     }
 
-    data->pin = pin;
-    data->num_pixels = pixel_size;
     data->transfer_in_progress = false;
     
     data->program_offset = pio_add_program(data->pio, &ws2812_program);
-    ws2812_program_init(data->pio, data->sm, data->program_offset, data->pin, 800000, false);
+    ws2812_program_init(data->pio, data->sm, data->program_offset, pin, 800000, false);
     
     data->dma_channel = dma_claim_unused_channel(true);
-    data->pixel_data = malloc(data->num_pixels * sizeof(uint32_t));
+    data->pixel_data = malloc(pixel_size * sizeof(uint32_t));
     ws2812_clear(ws);
     
     dma_channel_config c = dma_channel_get_default_config(data->dma_channel);
@@ -79,7 +70,7 @@ void ws2812_set_pixel_rgb(ws2812_t* ws, uint index, uint8_t r, uint8_t g, uint8_
 
 void ws2812_clear(ws2812_t* ws) {
     rp2040_ws2812_data_t* data = (rp2040_ws2812_data_t*)ws->platform_data;
-    memset(data->pixel_data, 0, data->num_pixels * sizeof(uint32_t));
+    memset(data->pixel_data, 0, ws->pixel_size * sizeof(uint32_t));
 }
 
 static bool ws2812_is_busy(ws2812_t* ws) {
@@ -102,7 +93,8 @@ void ws2812_show(ws2812_t* ws) {
         tight_loop_contents();
     }    
     data->transfer_in_progress = true;
-    start_dma_transfer(data);
+    dma_channel_set_read_addr(data->dma_channel, data->pixel_data, false);
+    dma_channel_set_trans_count(data->dma_channel, ws->pixel_size, true);
 }
 
 void ws2812_cleanup(ws2812_t* ws) {

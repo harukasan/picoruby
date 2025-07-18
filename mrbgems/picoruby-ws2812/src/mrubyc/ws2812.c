@@ -5,8 +5,8 @@
 static void
 c_ws2812_init(mrbc_vm *vm, mrbc_value *v, int argc)
 {
-  uint pin = (uint)GET_INT_ARG(1);
-  uint pixel_size = (uint)GET_INT_ARG(2);
+  int pin = (int)GET_INT_ARG(1);
+  int pixel_size = (int)GET_INT_ARG(2);
 
   ws2812_t *ws = MRBC_INSTANCE_DATA_PTR(v, ws2812_t);
   int ret = ws2812_init(ws, pin, pixel_size);
@@ -30,13 +30,13 @@ ws2812_destructor(mrbc_value *obj)
 static void
 c_ws2812_set_pixel_at_rgb(mrbc_vm *vm, mrbc_value *v, int argc)
 {
-  uint index = (uint)GET_INT_ARG(1);
+  int index = (int)GET_INT_ARG(1);
   uint8_t r = (uint8_t)GET_INT_ARG(2);
   uint8_t g = (uint8_t)GET_INT_ARG(3);
   uint8_t b = (uint8_t)GET_INT_ARG(4);
 
   ws2812_t *ws = MRBC_INSTANCE_DATA_PTR(v, ws2812_t);
-  ws2812_set_pixel_rgb(ws, index, r, g, b);
+  ws2812_set_pixel_at_rgb(ws, index, r, g, b);
   SET_INT_RETURN(0);
 }
 
