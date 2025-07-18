@@ -62,7 +62,7 @@ int ws2812_init(ws2812_t* ws, int pin, int pixel_size) {
     return 0;
 }
 
-void ws2812_set_pixel_rgb(ws2812_t* ws, uint index, uint8_t r, uint8_t g, uint8_t b) {
+void ws2812_set_pixel_at_rgb(ws2812_t* ws, int index, uint8_t r, uint8_t g, uint8_t b) {
     if (index >= ws->pixel_size) return;
     rp2040_ws2812_data_t* data = (rp2040_ws2812_data_t*)ws->platform_data;
     data->pixel_data[index] = rgb_to_grb(r, g, b) << 8u;
