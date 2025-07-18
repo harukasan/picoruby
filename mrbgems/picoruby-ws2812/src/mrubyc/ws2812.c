@@ -19,6 +19,15 @@ c_ws2812_init(mrbc_vm *vm, mrbc_value *v, int argc)
 }
 
 static void
+ws2812_destructor(mrbc_value *obj)
+{
+  ws2812_t *ws = MRBC_INSTANCE_DATA_PTR(obj, ws2812_t);
+  if (ws != NULL) {
+    ws2812_cleanup(ws);
+  }
+}
+
+static void
 c_ws2812_set_pixel_at_rgb(mrbc_vm *vm, mrbc_value *v, int argc)
 {
   uint index = (uint)GET_INT_ARG(1);
@@ -47,38 +56,14 @@ c_ws2812_show(mrbc_vm *vm, mrbc_value *v, int argc)
   SET_INT_RETURN(0);
 }
 
-static void
-c_ws2812_pin(mrbc_vm *vm, mrbc_value *v, int argc)
-{
-  ws2812_t *ws = MRBC_INSTANCE_DATA_PTR(v, ws2812_t);
-  SET_INT_RETURN((int)ws->pin);
-}
-
-static void
-c_ws2812_pixel_size(mrbc_vm *vm, mrbc_value *v, int argc)
-{
-  ws2812_t *ws = MRBC_INSTANCE_DATA_PTR(v, ws2812_t);
-  SET_INT_RETURN((int)ws->pixel_size);
-}
-
-static void
-c_ws2812_cleanup(mrbc_vm *vm, mrbc_value *v, int argc)
-{
-  ws2812_t *ws = MRBC_INSTANCE_DATA_PTR(v, ws2812_t);
-  ws2812_cleanup(ws);
-  SET_INT_RETURN(0);
-}
-
 void
 mrbc_ws2812_init(mrbc_vm *vm)
 {
   mrbc_class *mrbc_class_WS2812 = mrbc_define_class(vm, "WS2812", mrbc_class_object);
+  mrbc_define_destructor(mrbc_class_WS2812, ws2812_destructor);
   
   mrbc_define_method(vm, mrbc_class_WS2812, "_init", c_ws2812_init);
   mrbc_define_method(vm, mrbc_class_WS2812, "set_pixel_at_rgb", c_ws2812_set_pixel_at_rgb);
   mrbc_define_method(vm, mrbc_class_WS2812, "clear", c_ws2812_clear);
   mrbc_define_method(vm, mrbc_class_WS2812, "show", c_ws2812_show);
-  mrbc_define_method(vm, mrbc_class_WS2812, "pin", c_ws2812_pin);
-  mrbc_define_method(vm, mrbc_class_WS2812, "pixel_size", c_ws2812_pixel_size);
-  mrbc_define_method(vm, mrbc_class_WS2812, "_cleanup", c_ws2812_cleanup);
 }
